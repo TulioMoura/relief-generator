@@ -39,28 +39,37 @@ vec2 randomVector(int vx, int vy, int seed){
     vec2 v;
     v.x = x;
     v.y = y;
+    //printf("%fx %fy \n", v.x, v.y);
     return v;
 }
 
-float dotProduct(int x, int y, float px, float py, int seed){
-    vec2 v = randomVector(x, y,seed);
-
+float dotProduct(int x, int y, float px, float py){
     float distancex = px-x;
     float distancey = py-y;
 
-    float dotProductx = distancex * v.x;
-    float dotProducty = distancey * v.y;
+    float dotProductx = distancex * x;
+    float dotProducty = distancey * y;
 
     return (dotProductx+dotProducty);
     }
 
 float perlin(float x, float y, int seed){
-
     int x0 = floor(x);
     int y0 = floor(y);
-   
-    float n = dotProduct(x0,y0,x,y,seed);
 
+    vec2 v0 = randomVector(x0, y0,seed);
+    vec2 v1 = randomVector(x0+1, y0, seed);
+    vec2 v2 = randomVector(x0,y0+1, seed);
+    vec2 v3 = randomVector(x0+1,y0+1, seed);
+    
+    float d0 = dotProduct(x,y, v0.x,v0.y);
+    float d1 = dotProduct(x,y, v1.x,v1.y);
+    float d2 = dotProduct(x,y, v2.x,v2.y);
+    float d3 = dotProduct(x,y, v3.x,v3.y);
+
+    
+    float n = d0 * d1 * d2 * d3;
+    printf("%f * %f* %f * %f #%f \n",d0,d1,d2,d3, n);
     return n;
 
 
@@ -74,7 +83,7 @@ int main(){
     file<<"P3 100 100 255\n";
     for(int i =0; i< 100; i++ ){
         for( int j = 0; j< 100; j++){
-            int terrain_heigth = ((perlin(i, j,252525)*0.5)+0.5) *512;
+            int terrain_heigth = ((perlin(i/10, j/10,252525)*0.5)+0.5) *512;
             int red;
             int green;
             if(terrain_heigth > 256){
