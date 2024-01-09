@@ -92,7 +92,7 @@ int main(){
             int red;
             int green;
             if(terrain_heigth > 255){
-                green = floor(terrain_heigth-255);
+                green = 256-floor(terrain_heigth-255);
                 red = 255;
             }
             else{
