@@ -30,12 +30,11 @@ struct vec2{
 };
 
 vec2 randomVector(int vx, int vy, int seed){
-    srand(seed+vx);
-    float x = rand()%1000;
-    srand(seed+vy);
-    float y = rand()%1000;
-    x = cos(x);
-    y = cos(y);
+    srand(seed*vx*vy);
+    float xt = rand()%1000;
+    float yt = rand()%1000;
+    float x = cos(xt)* sin(yt) * 0.4;
+    float y = cos(yt) * sin(xt) * 0.4;
     vec2 v;
     v.x = x;
     v.y = y;
@@ -43,9 +42,11 @@ vec2 randomVector(int vx, int vy, int seed){
     return v;
 }
 
-float dotProduct(int x, int y, float px, float py){
-    float distancex = px-x;
-    float distancey = py-y;
+float dotProduct(float x, float y, float px, float py){
+    float distancex = abs(x - px);
+    float distancey = abs(y - py) ;
+
+    //printf("%f # %f \n", x, px);
 
     float dotProductx = distancex * x;
     float dotProducty = distancey * y;
@@ -58,18 +59,22 @@ float perlin(float x, float y, int seed){
     int y0 = floor(y);
 
     vec2 v0 = randomVector(x0, y0,seed);
+    
     vec2 v1 = randomVector(x0+1, y0, seed);
     vec2 v2 = randomVector(x0,y0+1, seed);
     vec2 v3 = randomVector(x0+1,y0+1, seed);
-    
+    //printf("%f,\t %f \n",v3.x, v3.y);
+
+    //printf("%f # %i *** %f # %i \n", x, x0, y, y0);
     float d0 = dotProduct(x,y, v0.x,v0.y);
     float d1 = dotProduct(x,y, v1.x,v1.y);
     float d2 = dotProduct(x,y, v2.x,v2.y);
     float d3 = dotProduct(x,y, v3.x,v3.y);
 
-    
-    float n = d0 * d1 * d2 * d3;
-    printf("%f * %f* %f * %f #%f \n",d0,d1,d2,d3, n);
+    float i0 = (d1 - d0) * 0.5 + d0;
+    float i1 = (d3 -d2) *0.5 + d2;
+    float n = (i1 - i0) * 0.5 + i0;
+    //printf("%f * %f* %f * %f #%f \n",d0,d1,d2,d3, n);
     return n;
 
 
@@ -79,14 +84,14 @@ int main(){
     std::ofstream file;
     std::ofstream log_file;
     file.open("img.ppm");
-    //log_file.open("log.txt");
-    file<<"P3 100 100 255\n";
-    for(int i =0; i< 100; i++ ){
-        for( int j = 0; j< 100; j++){
-            int terrain_heigth = ((perlin(i/10, j/10,252525)*0.5)+0.5) *512;
+    log_file.open("log.txt");
+    file<<"P3 300 300 255\n";
+    for(float i =0; i< 300; i++ ){
+        for( float j = 0; j< 300; j++){
+            int terrain_heigth = ((perlin(i/100, j/100,75)) *512);
             int red;
             int green;
-            if(terrain_heigth > 256){
+            if(terrain_heigth > 255){
                 green = floor(terrain_heigth-255);
                 red = 255;
             }
@@ -96,11 +101,11 @@ int main(){
             }
 
             file<<red<<" "<<green<<" "<<0<<std::endl;
-            //log_file<<(terrain_heigth/512)<<std::endl;
+            log_file<<(terrain_heigth/512)<<std::endl;
         }
         //printf("%i\n",i);
     }
     file.close();
-    //log_file.close();
+    log_file.close();
     return 0;
 }
