@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<fstream>
 #include<math.h>
+
+
  float reliefGenerator(int x, int y, int seed){
     srand(x*seed);
     float temp = cos( ((x*y)/5) * ((y*x)/2));
@@ -26,56 +28,35 @@
 }
 
 struct vec2{
-    float x, y;
+    double x, y;
 };
 
 vec2 randomVector(int vx, int vy, int seed){
-    srand(seed);
-    try
-    {
-        int value = rand()%1000;
-    
-    
-        vx = rand()%seed;
-    
-   
-        vy = rand()%seed;
-    
-    double xt =   pow((value % vy),seed/(rand()%100));
-    double yt = pow(value % vx,seed/(rand()%100));
-    //printf("%f %f", xt, yt);
-
-    double tempx = pow(xt*3.14,16);
-    double  tempy = pow(yt*3.14,16);
-    double x = cos(tempx/tempy);
-    double y = tan(tempx/tempy);
+   srand(seed + (vx *vx)+ (vy * vy)  + ( + vx * (+ vy)));
+    int xtemp = rand()%1000;
+    double x = xtemp/100.0;
     vec2 v;
-    v.x = x;
-    v.y = y;
-    //printf("%fx %fy \n", v.x, v.y);
-    return v;
-    }
-    catch(const std::exception& e)
-    {
-        printf("%s", e.what());
-        vec2 v;
-        v.x = 1;
-        v.y = 2;
-        return v;
-    }
-    
+    v.x  = cos(x);
+    int ytemp = rand()%1000;
+    double y = ytemp/100.0;
+    v.y = cos(y); 
+    return v; 
     
 }
 
-float dotProduct(float x, float y, float px, float py){
-    float distancex = abs(x - px);
-    float distancey = abs(y - py) ;
+float dotProduct(float x, float y, float px, float py,float fx, float fy){
+    float distancex = abs(x -px-fx);
+    float distancey = abs(y -py-fy);
 
-    //printf("%f # %f \n", x, px);
+    //printf(" %fx %fy # %fpx %fpy # %fdx %fdy \n",x,y, px,py, distancex - fx , distancey - fy);
 
-    float dotProductx = distancex * x;
-    float dotProducty = distancey * y;
+    /* float dotProductx = (x - fx)* px ;
+    float dotProducty = (y - fy) * py ; */
 
+    float dotProductx = (distancex)* px ;
+    float dotProducty = (distancey) * py ;
+
+    //printf("%f dx %f dy ");
     return (dotProductx+dotProducty);
     }
 
@@ -84,23 +65,25 @@ float perlin(float x, float y, int seed){
     int y0 = floor(y);
 
     vec2 v0 = randomVector(x0, y0,seed);
-    
     vec2 v1 = randomVector(x0+1, y0, seed);
     vec2 v2 = randomVector(x0,y0+1, seed);
     vec2 v3 = randomVector(x0+1,y0+1, seed);
-    //printf("%f,\t %f \n",v3.x, v3.y);
+    printf("%f,\t %f \n",v3.x, v3.y);
 
     //printf("%f # %i *** %f # %i \n", x, x0, y, y0);
-    float d0 = dotProduct(x,y, v0.x,v0.y);
-    float d1 = dotProduct(x,y, v1.x,v1.y);
-    float d2 = dotProduct(x,y, v2.x,v2.y);
-    float d3 = dotProduct(x,y, v3.x,v3.y);
+    float d0 = dotProduct(x,y, v0.x,v0.y, x0,y0);
+    float d1 = dotProduct(x,y, v1.x,v1.y, x0+1,y0);
+    float d2 = dotProduct(x,y, v2.x,v2.y, x0,y0+1);
+    float d3 = dotProduct(x,y, v3.x,v3.y, x0+1,y0+1);
 
-    float i0 = (d1 - d0) * 0.5 + d0;
-    float i1 = (d3 -d2) *0.5 + d2;
-    float n = (i1 - i0) * 0.5 + i0;
+    //printf("%f %f %f %f \n", d0,d1,d2,d3);
+
+   /*  float i0 = (d1 - d0) * 0.5 + d0;
+    float i1 = (d3 -d2) * 0.5 + d2;
+    float n = (i1 - i0) * 0.5 + i0; */
+
     //printf("%f * %f* %f * %f #%f \n",d0,d1,d2,d3, n);
-    return n;
+    return abs(cos(d0 * d1 * d2 * d3));
 
 
 }
@@ -114,7 +97,12 @@ int main(){
     printf("gulugulu");
     for(float i =0; i< 200; i++ ){
         for( float j = 0; j< 200; j++){
-            int terrain_heigth = ((perlin(i/100, j/100,75)) *512);
+            float perlin_res = (perlin(i/50.0, j/50.0,75));
+            //printf("%f \n", perlin_res);
+
+            log_file<<perlin_res<<"\n";
+            
+            int terrain_heigth = (perlin_res * 512);
             int red;
             int green;
             if(terrain_heigth > 255){
